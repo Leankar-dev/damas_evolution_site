@@ -1,0 +1,102 @@
+---
+import DownloadButtons from './DownloadButtons.astro';
+import MiniBoard from './MiniBoard.astro';
+import { heroScene } from '../config/scenes';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+---
+
+<section class="hero container" aria-labelledby="hero-title">
+  <div class="hero__copy">
+    <p class="eyebrow">{t.tagline}</p>
+    <h1 id="hero-title">{t.hero.title}</h1>
+    <p class="lead">{t.hero.subtitle}</p>
+    <div class="hero__actions">
+      <DownloadButtons {locale} />
+      <a class="hero__link" href="#how-to-play">
+        {t.hero.seeHowItWorks}
+      </a>
+    </div>
+  </div>
+  <div class="hero__stage">
+    <div class="hero__board">
+      <MiniBoard scene={heroScene} label={t.hero.boardLabel} loading="eager" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+    padding-block: var(--space-xl) var(--space-2xl);
+  }
+
+  .hero__copy {
+    display: grid;
+    gap: var(--space-m);
+    justify-items: start;
+  }
+
+  .hero__copy h1 {
+    font-size: var(--step-5);
+    max-width: 16ch;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+  }
+
+  .hero__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-weight: 700;
+    color: var(--color-link);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .hero__link:hover {
+    color: var(--color-text);
+  }
+
+  .hero__stage {
+    perspective: 1400px;
+    padding: var(--space-m);
+    overflow-x: clip;
+  }
+
+  .hero__board {
+    width: min(92%, 34rem);
+    margin-inline: auto;
+    transform: rotateX(24deg) rotateZ(-7deg);
+    transform-origin: 50% 60%;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  @media (min-width: 60rem) {
+    .hero {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      gap: var(--space-2xl);
+    }
+
+    .hero__board {
+      transform: rotateX(28deg) rotateZ(-9deg) translateY(1.5rem);
+    }
+
+    .hero__board:hover {
+      transform: rotateX(20deg) rotateZ(-6deg) translateY(1rem);
+    }
+  }
+</style>

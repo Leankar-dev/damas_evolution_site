@@ -1,0 +1,46 @@
+---
+import { site } from '../config/site';
+
+interface Props {
+  text: string;
+}
+
+interface Segment {
+  text: string;
+  bold: boolean;
+  href: string | null;
+}
+
+const { text } = Astro.props;
+
+const links: Record<string, { text: string; href: string }> = {
+  '{email}': { text: site.email, href: `mailto:${site.email}` },
+  '{developerUrl}': { text: site.developerUrl, href: site.developerUrl },
+};
+
+const segments: Segment[] = text
+  .split(/(\*\*[^*]+\*\*)/)
+  .filter((part) => part !== '')
+  .flatMap((part) => {
+    const bold = part.startsWith('**');
+    const inner = bold ? part.slice(2, -2) : part;
+    return inner
+      .split(/(\{email\}|\{developerUrl\})/)
+      .filter((piece) => piece !== '')
+      .map((piece) => {
+        const link = links[piece];
+        return { text: link?.text ?? piece, bold, href: link?.href ?? null };
+      });
+  });
+---
+
+{segments.map((segment) => {
+  const content = segment.href ? (
+    <a href={segment.href} rel={segment.href.startsWith('http') ? 'noopener' : undefined}>
+      {segment.text}
+    </a>
+  ) : (
+    segment.text
+  );
+  return segment.bold ? <strong>{content}</strong> : content;
+})}

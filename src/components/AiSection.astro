@@ -1,0 +1,191 @@
+---
+import AppScreen from './AppScreen.astro';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { ai } = getDictionary(locale);
+const levels = [
+  { level: 1, ...ai.levels.easy },
+  { level: 2, ...ai.levels.medium },
+  { level: 3, ...ai.levels.hard },
+];
+---
+
+<section class="ai container" id="ai" aria-labelledby="ai-title">
+  <div class="ai__main">
+    <header class="ai__header reveal">
+      <h2 id="ai-title">{ai.title}</h2>
+      <p class="lead">{ai.intro}</p>
+    </header>
+
+    <ul class="levels">
+      {levels.map((item) => (
+        <li class="level reveal">
+          <span
+            class="level__dots"
+            role="img"
+            aria-label={`${ai.levelLabel} ${item.level} ${ai.levelOf}`}
+          >
+            {[1, 2, 3].map((dot) => (
+              <span class:list={['level__dot', dot <= item.level && 'level__dot--on']} />
+            ))}
+          </span>
+          <span class="level__name">{item.name}</span>
+          <span class="level__text">{item.text}</span>
+        </li>
+      ))}
+    </ul>
+
+    <div class="ai__how reveal">
+      <h3>{ai.howTitle}</h3>
+      <p>{ai.how1}</p>
+      <p>{ai.how2}</p>
+    </div>
+  </div>
+
+  <div class="ai__stage reveal">
+    <AppScreen name="difficulty" {locale} />
+  </div>
+
+  <aside class="two-players reveal">
+    <span class="two-players__mark" aria-hidden="true">
+      2
+    </span>
+    <div>
+      <h3>{ai.twoPlayers.title}</h3>
+      <p>{ai.twoPlayers.text}</p>
+    </div>
+  </aside>
+</section>
+
+<style>
+  .ai {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl);
+    --device-width: 16rem;
+  }
+
+  .ai__main {
+    display: grid;
+    gap: var(--space-l);
+    align-content: start;
+  }
+
+  .ai__header {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .levels {
+    display: grid;
+    border-block: 1px solid var(--color-line);
+  }
+
+  .level {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'dots name'
+      'dots text';
+    column-gap: var(--space-s);
+    align-items: center;
+    padding-block: var(--space-s);
+  }
+
+  .level + .level {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .level__dots {
+    grid-area: dots;
+    display: inline-flex;
+    gap: 0.35rem;
+    min-width: 4.2rem;
+  }
+
+  .level__dot {
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 2px solid var(--color-wood);
+    border-radius: 50%;
+  }
+
+  .level__dot--on {
+    background-color: var(--color-wood);
+  }
+
+  .level__name {
+    grid-area: name;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .level__text {
+    grid-area: text;
+    color: var(--color-text-muted);
+  }
+
+  .ai__how {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .ai__how h3 {
+    font-size: var(--step-1);
+  }
+
+  .ai__stage {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+  }
+
+  .two-players {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-m);
+    padding: var(--space-m);
+    border-inline-start: 0.5rem solid var(--color-piece-blue);
+    border-radius: var(--radius-m);
+    background-color: var(--color-surface);
+  }
+
+  .two-players__mark {
+    font-family: var(--font-display);
+    font-size: var(--step-5);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--color-bg);
+    -webkit-text-stroke: 2px var(--color-piece-blue);
+  }
+
+  .two-players h3 {
+    font-size: var(--step-1);
+    margin-bottom: var(--space-3xs);
+  }
+
+  @media (min-width: 60rem) {
+    .ai {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      gap: var(--space-xl) var(--space-2xl);
+    }
+
+    .ai__stage {
+      transform: rotate(-2deg) translateY(var(--space-m));
+    }
+
+    .two-players {
+      grid-column: 1 / -1;
+      max-width: 44rem;
+    }
+  }
+</style>

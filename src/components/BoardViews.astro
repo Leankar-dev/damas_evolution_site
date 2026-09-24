@@ -1,0 +1,133 @@
+---
+import AppScreen from './AppScreen.astro';
+import CaptureSoundButton from './CaptureSoundButton.astro';
+import { availableScreen, isPlaceholderScreen } from '../assets/screens';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const copy = t.boardViews;
+const has3d = !isPlaceholderScreen('game-3d');
+const flatView = availableScreen('game-midgame', 'game');
+---
+
+<section class="board-views container" id="board-views" aria-labelledby="board-views-title">
+  <div class="board-views__copy reveal">
+    <h2 id="board-views-title">{copy.title}</h2>
+    <p>{copy.text}</p>
+    <p>{copy.text2}</p>
+    <div class="board-views__actions">
+      <CaptureSoundButton label={t.sound.playCapture} />
+    </div>
+    {has3d && (
+      <fieldset class="segmented">
+        <legend class="visually-hidden">{copy.legend}</legend>
+        <input type="radio" name="board-view" id="board-view-2d" value="2d" checked />
+        <label for="board-view-2d">{copy.view2d}</label>
+        <input type="radio" name="board-view" id="board-view-3d" value="3d" />
+        <label for="board-view-3d">{copy.view3d}</label>
+      </fieldset>
+    )}
+  </div>
+  <div class="board-views__stage reveal">
+    <div class="view view--flat">
+      <AppScreen name={flatView} {locale} />
+    </div>
+    {has3d && (
+      <div class="view view--3d">
+        <AppScreen name="game-3d" {locale} />
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .board-views {
+    display: grid;
+    gap: var(--space-l);
+    align-items: center;
+    padding-block: var(--space-2xl);
+    --device-width: 17rem;
+  }
+
+  .board-views__copy {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .board-views__actions {
+    padding-top: var(--space-2xs);
+  }
+
+  .board-views__stage {
+    display: grid;
+    justify-items: center;
+  }
+
+  .segmented {
+    display: inline-flex;
+    gap: var(--space-3xs);
+    margin: 0;
+    padding: var(--space-3xs);
+    border: 2px solid var(--color-line);
+    border-radius: var(--radius-pill);
+  }
+
+  .segmented input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .segmented label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    padding-inline: var(--space-m);
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    color: var(--color-link);
+    cursor: pointer;
+  }
+
+  .segmented input:checked + label {
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+  }
+
+  .segmented input:focus-visible + label {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .view--3d {
+    display: none;
+  }
+
+  .board-views:has(#board-view-3d:checked) .view--flat {
+    display: none;
+  }
+
+  .board-views:has(#board-view-3d:checked) .view--3d {
+    display: block;
+  }
+
+  @media (min-width: 48rem) {
+    .board-views {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-2xl);
+    }
+
+    .board-views__stage {
+      transform: rotate(2.5deg);
+    }
+  }
+</style>

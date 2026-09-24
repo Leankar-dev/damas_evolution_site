@@ -1,0 +1,19 @@
+---
+import DeviceFrame from './DeviceFrame.astro';
+import { getScreen, toCamelCase } from '../assets/screens';
+import { getDictionary } from '../i18n';
+import type { Dictionary } from '../i18n/types';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  name: string;
+  locale: Locale;
+  sizes?: string;
+  priority?: boolean;
+}
+
+const { name, locale, sizes, priority } = Astro.props;
+const alt = getDictionary(locale).screens[toCamelCase(name) as keyof Dictionary['screens']];
+---
+
+<DeviceFrame screen={getScreen(name, locale)} {alt} {sizes} {priority} />

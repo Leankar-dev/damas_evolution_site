@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AboutSection from '../../components/AboutSection.astro';
+import AiSection from '../../components/AiSection.astro';
+import BoardViews from '../../components/BoardViews.astro';
+import DownloadSection from '../../components/DownloadSection.astro';
+import FactStrip from '../../components/FactStrip.astro';
+import Hero from '../../components/Hero.astro';
+import HowToPlay from '../../components/HowToPlay.astro';
+import LanguagesSection from '../../components/LanguagesSection.astro';
+import PrivacyBand from '../../components/PrivacyBand.astro';
+import StatsSection from '../../components/StatsSection.astro';
+import { site } from '../../config/site';
+import { getDictionary, getLocalePaths, requireLocale } from '../../i18n';
+import { videoGame } from '../../utils/structured-data';
+
+export const getStaticPaths = getLocalePaths;
+
+const locale = requireLocale(Astro.params.lang);
+const t = getDictionary(locale);
+const structuredData = [videoGame(Astro.site ?? Astro.url, locale)];
+---
+
+<BaseLayout
+  {locale}
+  title={`${site.name} — ${t.tagline}`}
+  description={t.meta.homeDescription}
+  page=""
+  {structuredData}
+>
+  <Hero {locale} />
+  <FactStrip {locale} />
+  <HowToPlay {locale} />
+  <BoardViews {locale} />
+  <AiSection {locale} />
+  <StatsSection {locale} />
+  <PrivacyBand {locale} />
+  <LanguagesSection {locale} />
+  <DownloadSection {locale} />
+  <AboutSection {locale} />
+</BaseLayout>

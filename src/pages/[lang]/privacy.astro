@@ -1,0 +1,120 @@
+---
+import LegalLayout from '../../layouts/LegalLayout.astro';
+import RichText from '../../components/RichText.astro';
+import { site } from '../../config/site';
+import { getDictionary, getLocalePaths, requireLocale } from '../../i18n';
+import { getPrivacyPolicy, privacyUpdatedIso } from '../../i18n/privacy';
+
+export const getStaticPaths = getLocalePaths;
+
+const locale = requireLocale(Astro.params.lang);
+const t = getDictionary(locale);
+const policy = getPrivacyPolicy(locale);
+const sections = policy.sections.map((section, index) => ({
+  ...section,
+  id: `section-${index + 1}`,
+}));
+---
+
+<LegalLayout
+  {locale}
+  title={`${t.meta.privacyTitle} · ${site.name}`}
+  description={t.meta.privacyDescription}
+  page="privacy/"
+  heading={policy.title}
+  breadcrumbName={t.nav.privacy}
+  toc={sections.map(({ id, title }) => ({ id, title }))}
+>
+  <p slot="meta" class="policy__updated">
+    {policy.updatedLabel} <time datetime={privacyUpdatedIso}>{policy.updatedDate}</time>
+  </p>
+
+  <div class="policy">
+    {policy.intro.map((text) => (
+      <p class="policy__intro">
+        <RichText {text} />
+      </p>
+    ))}
+    {sections.map((section, index) => (
+      <section
+        class:list={['policy__section', index === 0 && 'policy__section--summary']}
+        id={section.id}
+        aria-labelledby={`${section.id}-title`}
+      >
+        <h2 id={`${section.id}-title`}>{section.title}</h2>
+        {section.blocks.map((block) =>
+          block.type === 'paragraph' ? (
+            <p>
+              <RichText text={block.text} />
+            </p>
+          ) : (
+            <ul>
+              {block.items.map((item) => (
+                <li>
+                  <RichText text={item} />
+                </li>
+              ))}
+            </ul>
+          ),
+        )}
+      </section>
+    ))}
+  </div>
+</LegalLayout>
+
+<style>
+  .policy__updated {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+    font-weight: 600;
+  }
+
+  .policy {
+    display: grid;
+    gap: var(--space-l);
+    max-width: 72ch;
+  }
+
+  .policy__intro {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .policy__section {
+    display: grid;
+    gap: var(--space-xs);
+    scroll-margin-top: var(--space-m);
+  }
+
+  .policy__section--summary {
+    padding: var(--space-m);
+    border-inline-start: 4px solid var(--color-wood);
+    border-radius: var(--radius-m);
+    background-color: var(--color-surface);
+  }
+
+  h2 {
+    font-size: var(--step-2);
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  li {
+    position: relative;
+    padding-inline-start: var(--space-m);
+  }
+
+  li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0.15rem;
+    top: 0.62em;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: var(--color-wood);
+    rotate: 45deg;
+  }
+</style>

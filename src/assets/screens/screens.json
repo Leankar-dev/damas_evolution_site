@@ -1,0 +1,13 @@
+{
+  "captured": [
+    "home",
+    "drawer",
+    "difficulty",
+    "game",
+    "game-3d",
+    "stats",
+    "settings",
+    "result-loss"
+  ],
+  "placeholders": ["game-midgame", "stats-full", "result-win"]
+}

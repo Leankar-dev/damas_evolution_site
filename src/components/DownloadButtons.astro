@@ -1,0 +1,34 @@
+---
+import DownloadButton from './DownloadButton.astro';
+import { site } from '../config/site';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { download } = getDictionary(locale);
+---
+
+<div class="download-buttons">
+  <DownloadButton
+    label={download.googlePlay}
+    url={site.googlePlayUrl}
+    comingSoon={download.comingSoon}
+  />
+  <DownloadButton
+    label={download.windows}
+    url={site.windowsStoreUrl}
+    comingSoon={download.comingSoon}
+  />
+</div>
+
+<style>
+  .download-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+</style>

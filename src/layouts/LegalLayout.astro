@@ -1,0 +1,81 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import BoardPattern from '../components/BoardPattern.astro';
+import PageToc from '../components/PageToc.astro';
+import { site } from '../config/site';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+import { breadcrumbList } from '../utils/structured-data';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  page: string;
+  heading: string;
+  breadcrumbName: string;
+  toc: { id: string; title: string }[];
+}
+
+const { locale, title, description, page, heading, breadcrumbName, toc } = Astro.props;
+const t = getDictionary(locale);
+const origin = Astro.site ?? Astro.url;
+const structuredData = [
+  breadcrumbList(origin, locale, [
+    { name: site.name, page: '' },
+    { name: breadcrumbName, page },
+  ]),
+];
+---
+
+<BaseLayout {locale} {title} {description} {page} {structuredData}>
+  <div class="legal container">
+    <header class="legal__header">
+      <h1>{heading}</h1>
+      <slot name="meta" />
+    </header>
+    <BoardPattern />
+    <div class="legal__grid">
+      <aside class="legal__aside">
+        <PageToc label={t.legal.toc} items={toc} />
+      </aside>
+      <article class="legal__body">
+        <slot />
+      </article>
+    </div>
+  </div>
+  <slot name="after" />
+</BaseLayout>
+
+<style>
+  .legal {
+    padding-block: var(--space-xl) var(--space-2xl);
+  }
+
+  .legal__header {
+    display: grid;
+    gap: var(--space-xs);
+    padding-bottom: var(--space-m);
+  }
+
+  .legal__header :global(h1) {
+    font-size: var(--step-4);
+  }
+
+  .legal__grid {
+    display: grid;
+    gap: var(--space-l);
+    padding-top: var(--space-l);
+  }
+
+  .legal__body {
+    min-width: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .legal__grid {
+      grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+      gap: var(--space-2xl);
+    }
+  }
+</style>

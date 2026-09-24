@@ -1,0 +1,44 @@
+---
+import { Picture } from 'astro:assets';
+import blueKing from '../assets/pieces/blue-king.webp';
+import blueRegular from '../assets/pieces/blue-regular.webp';
+import redKing from '../assets/pieces/red-king.webp';
+import redRegular from '../assets/pieces/red-regular.webp';
+
+interface Props {
+  color: 'red' | 'blue';
+  kind?: 'regular' | 'king';
+  size?: number;
+  alt?: string;
+  loading?: 'eager' | 'lazy';
+  class?: string;
+}
+
+const pieces = {
+  red: { regular: redRegular, king: redKing },
+  blue: { regular: blueRegular, king: blueKing },
+};
+
+const {
+  color,
+  kind = 'regular',
+  size = 48,
+  alt = '',
+  loading = 'lazy',
+  class: className,
+} = Astro.props;
+const image = pieces[color][kind];
+const height = Math.round((size * image.height) / image.width);
+---
+
+<Picture
+  src={image}
+  {alt}
+  width={size}
+  {height}
+  {loading}
+  densities={[1, 2]}
+  formats={['avif', 'webp']}
+  fallbackFormat="png"
+  class={className}
+/>

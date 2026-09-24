@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+import { getDictionary, localizedPath } from '../i18n';
+import { htmlLang, locales } from '../i18n/config';
+
+const description = getDictionary('en').notFound.text;
+---
+
+<BaseLayout locale="en" title={`404 · ${site.name}`} {description} noindex>
+  <div class="not-found container">
+    <h1>404</h1>
+    <div class="not-found__messages">
+      {locales.map((locale) => {
+        const t = getDictionary(locale);
+        return (
+          <section lang={htmlLang[locale]}>
+            <h2>{t.meta.notFoundTitle}</h2>
+            <p>{t.notFound.text}</p>
+            <a href={localizedPath(locale)}>{t.notFound.backHome}</a>
+          </section>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-2xl);
+  }
+
+  .not-found__messages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: var(--space-m);
+  }
+
+  h2 {
+    font-size: var(--step-2);
+    margin-bottom: var(--space-2xs);
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    color: var(--color-link);
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,196 @@
+---
+import LegalLayout from '../../layouts/LegalLayout.astro';
+import DownloadSection from '../../components/DownloadSection.astro';
+import RuleBlock from '../../components/RuleBlock.astro';
+import type { RuleSceneName } from '../../config/scenes';
+import { site } from '../../config/site';
+import { getDictionary, getLocalePaths, requireLocale } from '../../i18n';
+
+export const getStaticPaths = getLocalePaths;
+
+const locale = requireLocale(Astro.params.lang);
+const t = getDictionary(locale);
+const { rules } = t;
+
+interface Block {
+  scene: RuleSceneName;
+  label: string;
+  paragraphs: string[];
+  title?: string;
+}
+
+interface Section {
+  id: string;
+  title: string;
+  intro?: string;
+  blocks: Block[];
+}
+
+const sections: Section[] = [
+  {
+    id: 'board',
+    title: rules.board.title,
+    blocks: [
+      {
+        scene: 'initial',
+        label: rules.board.scene,
+        paragraphs: [rules.board.p1, rules.board.p2],
+      },
+    ],
+  },
+  {
+    id: 'moving',
+    title: rules.move.title,
+    blocks: [
+      { scene: 'move', label: rules.move.scene, paragraphs: [rules.move.p1, rules.move.p2] },
+    ],
+  },
+  {
+    id: 'capturing',
+    title: rules.capture.title,
+    intro: rules.capture.intro,
+    blocks: [
+      {
+        scene: 'mustCapture',
+        title: rules.capture.mandatory.title,
+        label: rules.capture.mandatory.scene,
+        paragraphs: [rules.capture.mandatory.text],
+      },
+      {
+        scene: 'backwardCapture',
+        title: rules.capture.backward.title,
+        label: rules.capture.backward.scene,
+        paragraphs: [rules.capture.backward.text],
+      },
+      {
+        scene: 'chain',
+        title: rules.capture.chain.title,
+        label: rules.capture.chain.scene,
+        paragraphs: [rules.capture.chain.text],
+      },
+    ],
+  },
+  {
+    id: 'majority',
+    title: rules.majority.title,
+    blocks: [
+      {
+        scene: 'majority',
+        label: rules.majority.scene,
+        paragraphs: [rules.majority.p1, rules.majority.p2],
+      },
+    ],
+  },
+  {
+    id: 'promotion',
+    title: rules.promotion.title,
+    blocks: [
+      { scene: 'promotion', label: rules.promotion.scene, paragraphs: [rules.promotion.text] },
+    ],
+  },
+  {
+    id: 'king',
+    title: rules.king.title,
+    intro: rules.king.intro,
+    blocks: [
+      {
+        scene: 'kingMove',
+        title: rules.king.move.title,
+        label: rules.king.move.scene,
+        paragraphs: [rules.king.move.text],
+      },
+      {
+        scene: 'kingCapture',
+        title: rules.king.capture.title,
+        label: rules.king.capture.scene,
+        paragraphs: [rules.king.capture.text],
+      },
+    ],
+  },
+  {
+    id: 'ending',
+    title: rules.end.title,
+    intro: rules.end.intro,
+    blocks: [
+      {
+        scene: 'win',
+        title: rules.end.win.title,
+        label: rules.end.win.scene,
+        paragraphs: [rules.end.win.text],
+      },
+      {
+        scene: 'draw',
+        title: rules.end.draw.title,
+        label: rules.end.draw.scene,
+        paragraphs: [rules.end.draw.text],
+      },
+    ],
+  },
+];
+
+const toc = [
+  ...sections.map(({ id, title }) => ({ id, title })),
+  { id: 'practice', title: rules.practice.title },
+];
+---
+
+<LegalLayout
+  {locale}
+  title={`${t.meta.rulesTitle} · ${site.name}`}
+  description={t.meta.rulesDescription}
+  page="rules/"
+  heading={t.meta.rulesTitle}
+  breadcrumbName={t.nav.rules}
+  {toc}
+>
+  <div class="rules">
+    <p class="lead">{rules.intro}</p>
+    <p class="rules__note">{rules.diagramNote}</p>
+
+    {sections.map((section) => (
+      <section class="rules__section" id={section.id} aria-labelledby={`${section.id}-title`}>
+        <h2 id={`${section.id}-title`}>{section.title}</h2>
+        {section.intro && <p class="rules__intro">{section.intro}</p>}
+        <div class="rules__blocks">
+          {section.blocks.map((block) => (
+            <RuleBlock {...block} />
+          ))}
+        </div>
+      </section>
+    ))}
+
+    <section class="rules__section" id="practice" aria-labelledby="practice-title">
+      <h2 id="practice-title">{rules.practice.title}</h2>
+      <p class="rules__intro">{rules.practice.text}</p>
+    </section>
+  </div>
+
+  <DownloadSection slot="after" {locale} />
+</LegalLayout>
+
+<style>
+  .rules {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .rules__note {
+    color: var(--color-text-muted);
+    font-size: var(--step--1);
+  }
+
+  .rules__section {
+    display: grid;
+    gap: var(--space-s);
+    scroll-margin-top: var(--space-m);
+  }
+
+  .rules__intro {
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  .rules__blocks {
+    padding-top: var(--space-xs);
+  }
+</style>

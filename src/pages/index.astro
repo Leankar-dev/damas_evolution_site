@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site';
+import { getDictionary, localizedPath } from '../i18n';
+import { htmlLang, localeNames, locales } from '../i18n/config';
+
+const description = getDictionary('en').meta.homeDescription;
+---
+
+<BaseLayout locale="en" title={site.name} {description}>
+  <section class="chooser container">
+    <h1>{site.name}</h1>
+    <ul>
+      {locales.map((locale) => (
+        <li>
+          <a href={localizedPath(locale)} lang={htmlLang[locale]} hreflang={htmlLang[locale]}>
+            <span class="chooser__name">{localeNames[locale]}</span>
+            <span class="chooser__tagline">{getDictionary(locale).tagline}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .chooser {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-2xl);
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-xs);
+    max-width: 32rem;
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    min-height: var(--touch-target);
+    padding: var(--space-xs) var(--space-s);
+    border: 2px solid var(--color-line);
+    border-radius: var(--radius-m);
+    text-decoration: none;
+    transition: border-color var(--duration-base) var(--ease-out);
+  }
+
+  a:hover {
+    border-color: var(--color-link);
+  }
+
+  .chooser__name {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 700;
+    color: var(--color-link);
+  }
+
+  .chooser__tagline {
+    color: var(--color-text-muted);
+  }
+</style>

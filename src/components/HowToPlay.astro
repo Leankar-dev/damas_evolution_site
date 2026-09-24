@@ -1,0 +1,196 @@
+---
+import MiniBoard from './MiniBoard.astro';
+import { howToScenes } from '../config/scenes';
+import { getDictionary, localizedPath } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { howTo } = getDictionary(locale);
+const steps = [
+  { key: 'move', copy: howTo.steps.move },
+  { key: 'capture', copy: howTo.steps.capture },
+  { key: 'chain', copy: howTo.steps.chain },
+  { key: 'king', copy: howTo.steps.king },
+] as const;
+---
+
+<section class="how-to container" id="how-to-play" aria-labelledby="how-to-title">
+  <header class="how-to__header">
+    <div>
+      <h2 id="how-to-title">{howTo.title}</h2>
+      <p class="lead">{howTo.intro}</p>
+    </div>
+    <button type="button" class="how-to__replay" data-replay hidden>
+      {howTo.replay}
+    </button>
+  </header>
+
+  <ol class="how-to__steps">
+    {steps.map((step) => (
+      <li class="step reveal">
+        <div class="step__copy">
+          <h3>{step.copy.title}</h3>
+          <p>{step.copy.text}</p>
+        </div>
+        <div class="step__board">
+          <MiniBoard scene={howToScenes[step.key]} label={step.copy.scene} animated />
+        </div>
+      </li>
+    ))}
+  </ol>
+
+  <a class="how-to__rules" href={localizedPath(locale, 'rules/')}>
+    {howTo.fullRules}
+  </a>
+</section>
+
+<script>
+  const boards = document.querySelectorAll<HTMLElement>('.mini-board[data-animated="true"]');
+  const replay = document.querySelector<HTMLButtonElement>('[data-replay]');
+  const motion = window.matchMedia('(prefers-reduced-motion: no-preference)');
+
+  const play = (board: HTMLElement) => {
+    board.dataset.state = 'ready';
+    void board.offsetWidth;
+    board.dataset.state = 'playing';
+  };
+
+  if (motion.matches && boards.length > 0) {
+    boards.forEach((board) => {
+      board.dataset.state = 'ready';
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.target instanceof HTMLElement) {
+            play(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.6 },
+    );
+    boards.forEach((board) => observer.observe(board));
+
+    if (replay) {
+      replay.hidden = false;
+      replay.addEventListener('click', () => boards.forEach(play));
+    }
+  }
+</script>
+
+<style>
+  .how-to {
+    padding-block: var(--space-3xl) var(--space-xl);
+    scroll-margin-top: var(--space-m);
+  }
+
+  .how-to__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-s) var(--space-m);
+    margin-bottom: var(--space-xl);
+  }
+
+  .how-to__header h2 {
+    margin-bottom: var(--space-2xs);
+  }
+
+  .how-to__replay {
+    min-height: var(--touch-target);
+    padding: var(--space-2xs) var(--space-m);
+    border: 2px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    background-color: transparent;
+    color: var(--color-link);
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .how-to__replay:hover {
+    border-color: var(--color-link);
+    transform: translateY(-1px);
+  }
+
+  .how-to__steps {
+    display: grid;
+    gap: var(--space-xl) var(--space-l);
+    counter-reset: step;
+  }
+
+  .step {
+    position: relative;
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+    padding: var(--space-m);
+    border-radius: var(--radius-l);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-s);
+    counter-increment: step;
+  }
+
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    top: -1.1rem;
+    inset-inline-start: var(--space-m);
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--color-bg);
+    -webkit-text-stroke: 2px var(--color-wood);
+  }
+
+  .step__copy {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-top: var(--space-m);
+  }
+
+  .step__board {
+    width: min(100%, 17rem);
+    padding: 0.35rem;
+  }
+
+  .how-to__rules {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    margin-top: var(--space-l);
+    font-weight: 700;
+    color: var(--color-link);
+  }
+
+  @media (min-width: 48rem) {
+    .how-to__steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .step:nth-child(even) {
+      margin-top: var(--space-xl);
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .step {
+      grid-template-columns: minmax(0, 1fr) 13rem;
+      align-items: center;
+    }
+
+    .step__board {
+      width: 100%;
+    }
+  }
+</style>

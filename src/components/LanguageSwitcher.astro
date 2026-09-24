@@ -1,0 +1,71 @@
+---
+import { htmlLang, localeNames, locales, type Locale } from '../i18n/config';
+import { localizedPath } from '../i18n';
+
+interface Props {
+  current: Locale;
+  page: string;
+  label: string;
+  variant?: 'compact' | 'full';
+}
+
+const { current, page, label, variant = 'compact' } = Astro.props;
+---
+
+<nav class:list={['language-switcher', `language-switcher--${variant}`]} aria-label={label}>
+  <ul>
+    {locales.map((candidate) => (
+      <li>
+        <a
+          href={localizedPath(candidate, page)}
+          lang={htmlLang[candidate]}
+          hreflang={htmlLang[candidate]}
+          aria-current={candidate === current ? 'page' : undefined}
+          aria-label={
+            variant === 'compact'
+              ? `${localeNames[candidate]} (${candidate.toUpperCase()})`
+              : undefined
+          }
+        >
+          {variant === 'compact' ? candidate.toUpperCase() : localeNames[candidate]}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs) var(--space-2xs);
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+    padding-inline: var(--space-xs);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    color: var(--color-link);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  a:hover {
+    border-color: var(--color-line);
+  }
+
+  a[aria-current='page'] {
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+  }
+
+  .language-switcher--compact a {
+    letter-spacing: 0.06em;
+    font-size: var(--step--1);
+  }
+</style>

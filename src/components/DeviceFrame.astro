@@ -1,0 +1,59 @@
+---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  screen: ImageMetadata;
+  alt: string;
+  sizes?: string | undefined;
+  priority?: boolean | undefined;
+}
+
+const { screen, alt, sizes = '(min-width: 48rem) 20rem, 70vw', priority = false } = Astro.props;
+---
+
+<figure class="device-frame">
+  <div class="device-frame__bezel">
+    <div class="device-frame__screen">
+      <Picture
+        src={screen}
+        {alt}
+        widths={[240, 360, 480, 720]}
+        {sizes}
+        formats={['avif', 'webp']}
+        fallbackFormat="jpg"
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : 'auto'}
+        decoding="async"
+      />
+    </div>
+  </div>
+</figure>
+
+<style>
+  .device-frame {
+    width: min(100%, var(--device-width, 18rem));
+    margin: 0;
+  }
+
+  .device-frame__bezel {
+    padding: 0.55rem;
+    border-radius: 2.4rem;
+    background: linear-gradient(145deg, #2d2823, #0f0d0b);
+    box-shadow:
+      var(--shadow-l),
+      inset 0 0 0 2px #423a32;
+  }
+
+  .device-frame__screen {
+    overflow: hidden;
+    border-radius: 1.9rem;
+    background-color: #0f0d0b;
+    line-height: 0;
+  }
+
+  .device-frame__screen :global(img) {
+    width: 100%;
+    height: auto;
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+import { htmlLang, locales, openGraphLocale, type Locale } from '../i18n/config';
+import { getDictionary, localizedPath, withBase } from '../i18n';
+import { site } from '../config/site';
+import { themeColors, themeStorageKey } from '../config/theme';
+import type { StructuredData } from '../utils/structured-data';
+import fraunces from '../assets/fonts/fraunces-latin-wght-normal.woff2?url';
+import figtree from '../assets/fonts/figtree-latin-wght-normal.woff2?url';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  page: string | null;
+  noindex: boolean;
+  structuredData: StructuredData[];
+}
+
+const { locale, title, description, page, noindex, structuredData } = Astro.props;
+const origin = Astro.site ?? Astro.url;
+const absolute = (path: string) => new URL(path, origin).href;
+const canonical = absolute(Astro.url.pathname);
+const shareImage = absolute(withBase('/og-image.jpg'));
+const shareImageAlt = getDictionary(locale).meta.ogImageAlt;
+const alternateLocales = locales.filter((candidate) => candidate !== locale);
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script is:inline define:vars={{ themeStorageKey }}>
+  try {
+    const stored = localStorage.getItem(themeStorageKey);
+    if (stored === 'light' || stored === 'dark') document.documentElement.dataset.theme = stored;
+  } catch {
+    void 0;
+  }
+</script>
+<title>{title}</title>
+<meta name="description" content={description} />
+{noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+{page !== null &&
+  locales.map((candidate) => (
+    <link
+      rel="alternate"
+      hreflang={htmlLang[candidate]}
+      href={absolute(localizedPath(candidate, page))}
+    />
+  ))}
+{page !== null && <link rel="alternate" hreflang="x-default" href={absolute(withBase('/'))} />}
+<meta name="theme-color" media="(prefers-color-scheme: light)" content={themeColors.light} />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content={themeColors.dark} />
+<link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+<link rel="icon" href={withBase('/favicon-32.png')} type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+<link rel="manifest" href={withBase('/manifest.webmanifest')} />
+<link rel="preload" href={fraunces} as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={figtree} as="font" type="font/woff2" crossorigin />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content={openGraphLocale[locale]} />
+{page !== null &&
+  alternateLocales.map((candidate) => (
+    <meta property="og:locale:alternate" content={openGraphLocale[candidate]} />
+  ))}
+<meta property="og:image" content={shareImage} />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={shareImageAlt} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content={shareImage} />
+<meta name="twitter:image:alt" content={shareImageAlt} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{structuredData.map((entry) => (
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify(entry).replaceAll('<', '\\u003c')}
+  ></script>
+))}

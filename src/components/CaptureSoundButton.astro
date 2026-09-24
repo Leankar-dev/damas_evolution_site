@@ -1,0 +1,45 @@
+---
+import { withBase } from '../i18n';
+
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<button type="button" class="sound-button" data-src={withBase('/audio/piece-capture.mp3')}>
+  {label}
+</button>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.sound-button').forEach((button) => {
+    let audio: HTMLAudioElement | undefined;
+    button.addEventListener('click', () => {
+      audio ??= new Audio(button.dataset.src);
+      audio.currentTime = 0;
+      audio.play().catch(() => undefined);
+    });
+  });
+</script>
+
+<style>
+  .sound-button {
+    min-height: var(--touch-target);
+    padding: var(--space-2xs) var(--space-m);
+    border: 2px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    background-color: transparent;
+    color: var(--color-link);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .sound-button:hover {
+    border-color: var(--color-link);
+    transform: translateY(-1px);
+  }
+</style>

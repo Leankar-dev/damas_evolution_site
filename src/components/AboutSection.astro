@@ -1,0 +1,91 @@
+---
+import { site } from '../config/site';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { about } = getDictionary(locale);
+---
+
+<section class="about container" id="about" aria-labelledby="about-title">
+  <h2 id="about-title" class="reveal">
+    {about.title}
+  </h2>
+  <div class="about__body reveal">
+    <p>{about.p1}</p>
+    <p>{about.p2}</p>
+    <p>{about.p3}</p>
+    <p>{about.p4}</p>
+    <p>{about.contact}</p>
+    <ul class="about__links">
+      <li>
+        <span>{about.website}</span>
+        <a href={site.developerUrl} rel="noopener">
+          {new URL(site.developerUrl).hostname}
+        </a>
+      </li>
+      <li>
+        <span>{about.email}</span>
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    gap: var(--space-m);
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .about h2 {
+    font-size: var(--step-3);
+  }
+
+  .about__body {
+    display: grid;
+    gap: var(--space-s);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .about__links {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-top: var(--space-s);
+    font-size: var(--step-0);
+  }
+
+  .about__links li {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .about__links span {
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .about__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-weight: 700;
+    color: var(--color-link);
+  }
+
+  @media (min-width: 48rem) {
+    .about {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      gap: var(--space-2xl);
+    }
+  }
+</style>

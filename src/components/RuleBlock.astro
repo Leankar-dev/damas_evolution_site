@@ -1,0 +1,68 @@
+---
+import MiniBoard from './MiniBoard.astro';
+import { ruleScenes, type RuleSceneName } from '../config/scenes';
+
+interface Props {
+  scene: RuleSceneName;
+  label: string;
+  paragraphs: string[];
+  title?: string;
+}
+
+const { scene, label, paragraphs, title } = Astro.props;
+const board = ruleScenes[scene];
+const figureWidth = board.cols > 6 ? '21rem' : '16rem';
+---
+
+<div class="rule" style={`--figure-width: ${figureWidth}`}>
+  <div class="rule__text">
+    {title && <h3>{title}</h3>}
+    {paragraphs.map((text) => (
+      <p>{text}</p>
+    ))}
+  </div>
+  <figure class="rule__figure">
+    <MiniBoard scene={board} {label} />
+  </figure>
+</div>
+
+<style>
+  .rule {
+    display: grid;
+    gap: var(--space-s);
+    align-items: center;
+  }
+
+  .rule__text {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .rule__figure {
+    width: min(100%, var(--figure-width));
+    padding: 0.35rem;
+  }
+
+  .rule + .rule {
+    margin-top: var(--space-l);
+  }
+
+  @media (min-width: 48rem) {
+    .rule {
+      grid-template-columns: minmax(0, 1fr) var(--figure-width);
+      gap: var(--space-l);
+    }
+
+    .rule__figure {
+      width: 100%;
+    }
+
+    .rule:nth-of-type(even) .rule__figure {
+      rotate: 0.6deg;
+    }
+
+    .rule:nth-of-type(odd) .rule__figure {
+      rotate: -0.4deg;
+    }
+  }
+</style>

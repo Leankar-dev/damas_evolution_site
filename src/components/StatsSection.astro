@@ -1,0 +1,112 @@
+---
+import AppScreen from './AppScreen.astro';
+import Piece from './Piece.astro';
+import { availableScreen } from '../assets/screens';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { stats } = getDictionary(locale);
+const items = [
+  stats.items.played,
+  stats.items.winRate,
+  stats.items.averageMoves,
+  stats.items.streaks,
+  stats.items.byMode,
+  stats.items.byDifficulty,
+  stats.items.recent,
+];
+const screen = availableScreen('stats-full', 'stats');
+---
+
+<section class="stats container" id="stats" aria-labelledby="stats-title">
+  <div class="stats__stage reveal">
+    <AppScreen name={screen} {locale} />
+  </div>
+  <div class="stats__copy">
+    <header class="stats__header reveal">
+      <h2 id="stats-title">{stats.title}</h2>
+      <p class="lead">{stats.intro}</p>
+    </header>
+    <ul class="stat-list">
+      {items.map((item, index) => (
+        <li class="reveal">
+          <Piece color={index % 2 === 0 ? 'red' : 'blue'} size={28} />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="stats__note reveal">{stats.note}</p>
+  </div>
+</section>
+
+<style>
+  .stats {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+    padding-block: var(--space-2xl);
+    --device-width: 17rem;
+  }
+
+  .stats__stage {
+    display: grid;
+    justify-items: center;
+  }
+
+  .stats__copy {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .stats__header {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .stat-list {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .stat-list li {
+    display: grid;
+    grid-template-columns: 1.75rem 1fr;
+    align-items: center;
+    gap: var(--space-xs);
+    padding-block: var(--space-2xs);
+    border-bottom: 1px dashed var(--color-line);
+  }
+
+  .stat-list li :global(img) {
+    width: 1.75rem;
+    height: auto;
+  }
+
+  .stat-list span {
+    font-weight: 600;
+  }
+
+  .stats__note {
+    max-width: 46ch;
+    padding: var(--space-s) var(--space-m);
+    border-inline-start: 0.4rem solid var(--color-gold);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-s);
+  }
+
+  @media (min-width: 48rem) {
+    .stats {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+      gap: var(--space-2xl);
+    }
+
+    .stats__stage {
+      transform: rotate(-2deg);
+    }
+  }
+</style>

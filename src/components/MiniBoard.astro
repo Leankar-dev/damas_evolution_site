@@ -1,0 +1,388 @@
+---
+import Piece from './Piece.astro';
+import type { Cell, Scene } from '../config/scenes';
+
+interface Props {
+  scene: Scene;
+  label: string;
+  animated?: boolean;
+  loading?: 'eager' | 'lazy';
+}
+
+const { scene, label, animated = false, loading = 'lazy' } = Astro.props;
+
+const center = ([row, col]: Cell): [number, number] => [col + 0.5, row + 0.5];
+const trim = (from: [number, number], to: [number, number], amount: number): [number, number] => {
+  const dx = to[0] - from[0];
+  const dy = to[1] - from[1];
+  const length = Math.hypot(dx, dy);
+  return [from[0] + (dx / length) * amount, from[1] + (dy / length) * amount];
+};
+
+const buildRoute = (cells: readonly Cell[]) => {
+  const centers = cells.map(center);
+  const trimmed = centers.map((point, index) => {
+    if (index === 0) return trim(point, centers[1] ?? point, 0.34);
+    if (index === centers.length - 1) return trim(point, centers[index - 1] ?? point, 0.34);
+    return point;
+  });
+  const tip = trimmed.at(-1) ?? [0, 0];
+  const before = trimmed.at(-2) ?? tip;
+  const angle = Math.atan2(tip[1] - before[1], tip[0] - before[0]);
+  const wing = (offset: number) =>
+    `${tip[0] + 0.3 * Math.cos(angle + offset)},${tip[1] + 0.3 * Math.sin(angle + offset)}`;
+  return {
+    line: trimmed.map((point) => point.join(',')).join(' '),
+    arrow: `${tip.join(',')} ${wing(2.6)} ${wing(-2.6)}`,
+  };
+};
+
+const main = scene.route ? buildRoute(scene.route) : null;
+const alt = scene.altRoute ? buildRoute(scene.altRoute) : null;
+const marks = (scene.marks ?? []).map((mark) => {
+  const [x, y] = center(mark.cell);
+  return { ...mark, x, y };
+});
+const showOverlay = main !== null || alt !== null || marks.length > 0;
+
+const at = (piece: Scene['pieces'][number], index: number) =>
+  piece.path[Math.min(index, piece.path.length - 1)] ?? piece.path[0] ?? ([0, 0] as const);
+
+const styleFor = (piece: Scene['pieces'][number]) => {
+  const values = [0, 1, 2].flatMap((index) => {
+    const [row, col] = at(piece, index);
+    return [`--x${index}: ${col}`, `--y${index}: ${row}`];
+  });
+  const [finalRow, finalCol] = at(piece, piece.path.length - 1);
+  values.push(`--xf: ${finalCol}`, `--yf: ${finalRow}`);
+  if (piece.vanishAt !== undefined) values.push(`--at: ${piece.vanishAt}`);
+  if (piece.crownAt !== undefined) values.push(`--at: ${piece.crownAt}`);
+  return values.join('; ');
+};
+---
+
+<div
+  class="mini-board"
+  role="img"
+  aria-label={label}
+  data-animated={animated ? 'true' : undefined}
+  style={`--rows: ${scene.rows}; --cols: ${scene.cols}`}
+>
+  <div class="mini-board__pieces" aria-hidden="true">
+    {scene.pieces.map((piece) => {
+      const moving = piece.path.length > 1;
+      const crowning = piece.crownAt !== undefined;
+      return (
+        <div
+          class:list={[
+            'mini-piece',
+            moving && 'mini-piece--moving',
+            piece.vanishAt !== undefined && 'mini-piece--captured',
+            piece.ghost && 'mini-piece--ghost',
+          ]}
+          style={styleFor(piece)}
+        >
+          {crowning ? (
+            <>
+              <span class="mini-piece__face mini-piece__face--regular">
+                <Piece color={piece.color} size={72} {loading} />
+              </span>
+              <span class="mini-piece__face mini-piece__face--king">
+                <Piece color={piece.color} kind="king" size={72} {loading} />
+              </span>
+            </>
+          ) : (
+            <span class="mini-piece__face">
+              <Piece
+                color={piece.color}
+                kind={piece.king ? 'king' : 'regular'}
+                size={72}
+                {loading}
+              />
+            </span>
+          )}
+        </div>
+      );
+    })}
+  </div>
+  {showOverlay && (
+    <svg
+      class="mini-board__route"
+      viewBox={`0 0 ${scene.cols} ${scene.rows}`}
+      aria-hidden="true"
+      focusable="false"
+    >
+      {marks.map((mark) => {
+        if (mark.kind === 'selected') {
+          return (
+            <rect
+              class="mini-board__mark-selected"
+              x={mark.x - 0.44}
+              y={mark.y - 0.44}
+              width="0.88"
+              height="0.88"
+              rx="0.08"
+            />
+          );
+        }
+        if (mark.kind === 'target') {
+          return <circle class="mini-board__mark-target" cx={mark.x} cy={mark.y} r="0.17" />;
+        }
+        const cross = `M${mark.x - 0.2},${mark.y - 0.2} L${mark.x + 0.2},${mark.y + 0.2} M${mark.x + 0.2},${mark.y - 0.2} L${mark.x - 0.2},${mark.y + 0.2}`;
+        return (
+          <>
+            <path class="mini-board__mark-blocked-shadow" d={cross} />
+            <path class="mini-board__mark-blocked" d={cross} />
+          </>
+        );
+      })}
+      {alt && (
+        <>
+          <polyline class="mini-board__route-shadow" points={alt.line} />
+          <polygon class="mini-board__route-shadow" points={alt.arrow} />
+          <polyline class="mini-board__route-line mini-board__route-line--alt" points={alt.line} />
+          <polygon
+            class="mini-board__route-arrow mini-board__route-arrow--alt"
+            points={alt.arrow}
+          />
+        </>
+      )}
+      {main && (
+        <>
+          <polyline class="mini-board__route-shadow" points={main.line} />
+          <polygon class="mini-board__route-shadow" points={main.arrow} />
+          <polyline class="mini-board__route-line" points={main.line} />
+          <polygon class="mini-board__route-arrow" points={main.arrow} />
+        </>
+      )}
+    </svg>
+  )}
+</div>
+
+<style>
+  .mini-board {
+    --total: 2.6s;
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--cols) / var(--rows);
+    background: conic-gradient(
+        var(--color-board-dark) 25%,
+        var(--color-board-light) 0 50%,
+        var(--color-board-dark) 0 75%,
+        var(--color-board-light) 0
+      )
+      0 0 / calc(200% / var(--cols)) calc(200% / var(--rows));
+    border-radius: var(--radius-s);
+    box-shadow:
+      0 0 0 0.35rem var(--color-wood-strong),
+      var(--shadow-m);
+  }
+
+  .mini-board__pieces {
+    position: absolute;
+    inset: 0;
+  }
+
+  .mini-piece {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(100% / var(--cols));
+    aspect-ratio: 1;
+    transform: translate(calc(var(--xf) * 100%), calc(var(--yf) * 100%));
+  }
+
+  .mini-piece__face {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mini-piece__face :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .mini-piece__face--regular {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .mini-piece__face--king {
+    position: absolute;
+    inset: 0;
+  }
+
+  .mini-piece--captured {
+    opacity: 0.28;
+    filter: grayscale(0.7);
+  }
+
+  .mini-board__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .mini-board__route polyline {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mini-board__route-shadow {
+    fill: var(--color-ink);
+    stroke: var(--color-ink);
+    stroke-width: 0.13;
+    opacity: 0.55;
+  }
+
+  polyline.mini-board__route-shadow {
+    fill: none;
+  }
+
+  .mini-board__route-line {
+    stroke: var(--color-gold-bright);
+    stroke-width: 0.07;
+    stroke-dasharray: 0.16 0.14;
+  }
+
+  .mini-board__route-arrow {
+    fill: var(--color-gold-bright);
+  }
+
+  .mini-board__route-line--alt {
+    stroke: var(--color-on-wood);
+    opacity: 0.6;
+  }
+
+  .mini-board__route-arrow--alt {
+    fill: var(--color-on-wood);
+    opacity: 0.6;
+  }
+
+  .mini-board__mark-target {
+    fill: var(--color-gold-bright);
+    stroke: var(--color-ink);
+    stroke-width: 0.04;
+    opacity: 0.9;
+  }
+
+  .mini-board__mark-selected {
+    fill: none;
+    stroke: var(--color-gold-bright);
+    stroke-width: 0.07;
+  }
+
+  .mini-board__mark-blocked,
+  .mini-board__mark-blocked-shadow {
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .mini-board__mark-blocked {
+    stroke: var(--color-on-wood);
+    stroke-width: 0.09;
+  }
+
+  .mini-board__mark-blocked-shadow {
+    stroke: var(--color-ink);
+    stroke-width: 0.17;
+    opacity: 0.6;
+  }
+
+  .mini-piece--ghost {
+    opacity: 0.55;
+  }
+
+  .mini-board[data-state='ready'] .mini-piece {
+    transform: translate(calc(var(--x0) * 100%), calc(var(--y0) * 100%));
+  }
+
+  .mini-board[data-state='ready'] .mini-piece--captured {
+    opacity: 1;
+    filter: none;
+  }
+
+  .mini-board[data-state='ready'] .mini-piece__face--regular {
+    opacity: 1;
+  }
+
+  .mini-board[data-state='ready'] .mini-piece__face--king {
+    opacity: 0;
+  }
+
+  .mini-board[data-state='ready'] .mini-board__route {
+    opacity: 0;
+  }
+
+  .mini-board[data-state='playing'] .mini-piece--moving {
+    animation: travel var(--total) linear both;
+  }
+
+  .mini-board[data-state='playing'] .mini-piece--captured {
+    animation: vanish 0.35s calc(var(--total) * var(--at)) both;
+  }
+
+  .mini-board[data-state='playing'] .mini-piece__face--regular {
+    animation: fade-out 0.3s calc(var(--total) * var(--at)) both;
+  }
+
+  .mini-board[data-state='playing'] .mini-piece__face--king {
+    animation: fade-in 0.3s calc(var(--total) * var(--at)) both;
+  }
+
+  .mini-board[data-state='playing'] .mini-board__route {
+    animation: fade-in 0.4s both;
+  }
+
+  @keyframes travel {
+    0%,
+    15% {
+      transform: translate(calc(var(--x0) * 100%), calc(var(--y0) * 100%));
+      animation-timing-function: ease-in-out;
+    }
+    50%,
+    65% {
+      transform: translate(calc(var(--x1) * 100%), calc(var(--y1) * 100%));
+      animation-timing-function: ease-in-out;
+    }
+    100% {
+      transform: translate(calc(var(--x2) * 100%), calc(var(--y2) * 100%));
+    }
+  }
+
+  @keyframes vanish {
+    from {
+      opacity: 1;
+      filter: none;
+    }
+    to {
+      opacity: 0.28;
+      filter: grayscale(0.7);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+</style>

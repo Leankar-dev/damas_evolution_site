@@ -1,0 +1,89 @@
+---
+import BoardPattern from './BoardPattern.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { site } from '../config/site';
+import { getDictionary, localizedPath } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+  page: string;
+}
+
+const { locale, page } = Astro.props;
+const t = getDictionary(locale);
+---
+
+<footer class="site-footer">
+  <BoardPattern />
+  <div class="site-footer__inner container">
+    <p class="site-footer__signature">
+      {site.name} <span>{site.signature}</span>
+    </p>
+    <ul class="site-footer__links">
+      <li>
+        <a href={localizedPath(locale, 'rules/')}>{t.nav.rules}</a>
+      </li>
+      <li>
+        <a href={localizedPath(locale, 'privacy/')}>{t.nav.privacy}</a>
+      </li>
+      <li>
+        <a href={site.developerUrl} rel="noopener">
+          {new URL(site.developerUrl).hostname}
+        </a>
+      </li>
+      <li>
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+      </li>
+    </ul>
+    <LanguageSwitcher current={locale} {page} label={t.footer.language} variant="full" />
+    <p class="site-footer__copyright">
+      © {site.copyrightYear} {site.author}
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-3xl);
+  }
+
+  .site-footer__inner {
+    display: grid;
+    gap: var(--space-s);
+    padding-block: var(--space-l);
+  }
+
+  .site-footer__signature {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 700;
+  }
+
+  .site-footer__signature span {
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-inline-start: var(--space-2xs);
+  }
+
+  .site-footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs) var(--space-m);
+  }
+
+  .site-footer__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+    color: var(--color-link);
+  }
+
+  .site-footer__copyright {
+    font-size: var(--step--1);
+    color: var(--color-text-muted);
+  }
+</style>

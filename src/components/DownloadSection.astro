@@ -1,0 +1,93 @@
+---
+import DownloadButtons from './DownloadButtons.astro';
+import Piece from './Piece.astro';
+import { site } from '../config/site';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { download } = getDictionary(locale);
+const releasedCount = [site.googlePlayUrl, site.windowsStoreUrl].filter(
+  (url) => url !== null,
+).length;
+const intro = { 0: download.soon, 2: download.available }[releasedCount] ?? null;
+---
+
+<section class="download" id="download" aria-labelledby="download-title">
+  <div class="download__inner container reveal">
+    <div class="download__piece download__piece--red" aria-hidden="true">
+      <Piece color="red" kind="king" size={112} />
+    </div>
+    <div class="download__copy">
+      <h2 id="download-title">{download.title}</h2>
+      {intro && <p>{intro}</p>}
+      <DownloadButtons {locale} />
+    </div>
+    <div class="download__piece download__piece--blue" aria-hidden="true">
+      <Piece color="blue" size={112} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .download {
+    background-color: var(--color-wood-strong);
+    color: var(--color-on-wood);
+    --color-button-bg: var(--color-on-wood);
+    --color-button-text: var(--color-wood-strong);
+    --color-text-muted: #f0e6c8;
+    --color-line: rgb(245 237 213 / 0.7);
+    --color-focus: var(--color-gold-bright);
+  }
+
+  .download__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: var(--space-m);
+    padding-block: var(--space-2xl);
+    text-align: center;
+  }
+
+  .download__copy {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: center;
+  }
+
+  .download__copy p {
+    font-size: var(--step-1);
+  }
+
+  .download :global(.download-buttons) {
+    justify-content: center;
+  }
+
+  .download__piece {
+    display: none;
+  }
+
+  @media (min-width: 48rem) {
+    .download__inner {
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+    }
+
+    .download__piece {
+      display: block;
+      width: 7rem;
+    }
+
+    .download__piece--red {
+      transform: rotate(-8deg);
+    }
+
+    .download__piece--blue {
+      transform: rotate(6deg) translateY(1rem);
+    }
+  }
+</style>

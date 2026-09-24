@@ -1,0 +1,41 @@
+{
+  "name": "damas-evolution-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "assets:import": "node scripts/import-docs-assets.mjs",
+    "assets:placeholders": "node scripts/generate-placeholders.mjs",
+    "assets:icons": "node scripts/generate-icons.mjs",
+    "assets:og": "node scripts/generate-og-image.mjs",
+    "assets:audio": "node scripts/compress-audio.mjs",
+    "assets": "npm run assets:import && npm run assets:placeholders && npm run assets:icons && npm run assets:og && npm run assets:audio",
+    "check:images": "node scripts/check-image-sizes.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@eslint/js": "^10.0.1",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "eslint": "^10.11.0",
+    "eslint-plugin-astro": "^3.2.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "prettier-plugin-astro": "^1.0.1",
+    "sharp": "^0.35.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1"
+  }
+}

@@ -1,0 +1,71 @@
+---
+interface Props {
+  label: string;
+  url: string | null;
+  comingSoon: string;
+}
+
+const { label, url, comingSoon } = Astro.props;
+---
+
+{url ? (
+  <a class="download-button" href={url} rel="noopener">
+    <span class="download-button__label">{label}</span>
+  </a>
+) : (
+  <a class="download-button download-button--disabled" role="link" aria-disabled="true">
+    <span class="download-button__label">{label}</span>
+    <span class="download-button__status">{comingSoon}</span>
+  </a>
+)}
+
+<style>
+  .download-button {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-3xs);
+    min-height: var(--touch-target);
+    min-width: 11rem;
+    padding: var(--space-xs) var(--space-m);
+    border: 2px solid var(--color-button-bg);
+    border-radius: var(--radius-m);
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+    font-weight: 700;
+    line-height: 1.15;
+    text-decoration: none;
+    box-shadow: var(--shadow-s);
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .download-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-m);
+  }
+
+  .download-button:active {
+    transform: translateY(0);
+  }
+
+  .download-button--disabled {
+    background-color: transparent;
+    color: var(--color-text-muted);
+    border: 2px dashed var(--color-line);
+    box-shadow: none;
+    cursor: default;
+  }
+
+  .download-button--disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .download-button__status {
+    font-size: var(--step--1);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+</style>

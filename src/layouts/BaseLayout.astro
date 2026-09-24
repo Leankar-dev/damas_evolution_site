@@ -1,0 +1,79 @@
+---
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/reset.css';
+import '../styles/typography.css';
+import '../styles/utilities.css';
+import SeoHead from '../components/SeoHead.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getDictionary } from '../i18n';
+import { htmlLang, type Locale } from '../i18n/config';
+import type { StructuredData } from '../utils/structured-data';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  page?: string | null;
+  noindex?: boolean;
+  structuredData?: StructuredData[];
+}
+
+const {
+  locale,
+  title,
+  description,
+  page = null,
+  noindex = false,
+  structuredData = [],
+} = Astro.props;
+const t = getDictionary(locale);
+---
+
+<!doctype html>
+<html lang={htmlLang[locale]}>
+  <head>
+    <SeoHead {locale} {title} {description} {page} {noindex} {structuredData} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      {t.a11y.skipToContent}
+    </a>
+    {page !== null && <SiteHeader {locale} {page} />}
+    <main id="main">
+      <slot />
+    </main>
+    {page !== null && <SiteFooter {locale} {page} />}
+  </body>
+</html>
+
+<style is:global>
+  .skip-link {
+    position: absolute;
+    inset-inline-start: var(--space-xs);
+    top: var(--space-xs);
+    z-index: 10;
+    padding: var(--space-xs) var(--space-s);
+    border-radius: var(--radius-m);
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  body {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+  }
+</style>

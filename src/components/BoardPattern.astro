@@ -1,0 +1,38 @@
+---
+interface Props {
+  variant?: 'strip' | 'field';
+  cell?: string;
+}
+
+const { variant = 'strip', cell = '0.75rem' } = Astro.props;
+---
+
+<div
+  class:list={['board-pattern', `board-pattern--${variant}`]}
+  style={`--cell: ${cell}`}
+  aria-hidden="true"
+></div>
+
+<style>
+  .board-pattern {
+    background: conic-gradient(
+        var(--color-wood) 25%,
+        transparent 0 50%,
+        var(--color-wood) 0 75%,
+        transparent 0
+      )
+      0 0 / calc(var(--cell) * 2) calc(var(--cell) * 2);
+  }
+
+  .board-pattern--strip {
+    height: var(--cell);
+    opacity: 0.35;
+  }
+
+  .board-pattern--field {
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+</style>

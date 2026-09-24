@@ -1,0 +1,117 @@
+---
+import { getDictionary } from '../i18n';
+import { htmlLang, localeNames, locales, type Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { languagesSection: copy } = getDictionary(locale);
+const split = (text: string): [string, string] => {
+  const [term = '', ...rest] = text.split(/\s?:\s/);
+  const description = rest.join(': ');
+  return [term, description.charAt(0).toUpperCase() + description.slice(1)];
+};
+const accessibility = [copy.screenReader, copy.fontScale, copy.screens].map(split);
+---
+
+<section class="reach container" id="languages" aria-labelledby="languages-title">
+  <div class="reach__languages reveal">
+    <h2 id="languages-title">{copy.title}</h2>
+    <p class="lead">{copy.intro}</p>
+    <ul class="language-words">
+      {locales.map((code) => (
+        <li lang={htmlLang[code]}>{localeNames[code]}</li>
+      ))}
+    </ul>
+  </div>
+  <div class="reach__a11y reveal">
+    <h3>{copy.a11yTitle}</h3>
+    <dl>
+      {accessibility.map(([term, description]) => (
+        <div>
+          <dt>{term}</dt>
+          <dd>{description}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .reach {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl);
+  }
+
+  .reach__languages {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+
+  .language-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-m);
+    padding-top: var(--space-xs);
+  }
+
+  .language-words li {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-link);
+  }
+
+  .language-words li:nth-child(even) {
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  .reach__a11y {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+
+  .reach__a11y h3 {
+    font-size: var(--step-2);
+  }
+
+  dl {
+    display: grid;
+    margin: 0;
+    border-top: 1px solid var(--color-line);
+  }
+
+  dl div {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block: var(--space-s);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  dt {
+    font-weight: 800;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 60rem) {
+    .reach {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      gap: var(--space-2xl);
+    }
+
+    .reach__a11y {
+      padding-top: var(--space-2xl);
+    }
+  }
+</style>

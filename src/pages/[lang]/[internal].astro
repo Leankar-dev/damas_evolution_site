@@ -1,0 +1,162 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppScreen from '../../components/AppScreen.astro';
+import BoardPattern from '../../components/BoardPattern.astro';
+import CaptureSoundButton from '../../components/CaptureSoundButton.astro';
+import Piece from '../../components/Piece.astro';
+import logo from '../../assets/logo.png';
+import { allScreens, capturedScreens, hasScreen, localizedScreens } from '../../assets/screens';
+import { getDictionary, withBase } from '../../i18n';
+import { locales } from '../../i18n/config';
+
+export const getStaticPaths = () => [{ params: { lang: 'pt', internal: '_assets' } }];
+
+const locale = 'pt';
+const t = getDictionary(locale);
+const pieceKinds = ['regular', 'king'] as const;
+const pieceColors = ['red', 'blue'] as const;
+const pieceSizes = [32, 64, 128];
+const otherLocales = locales.filter((candidate) => candidate !== locale);
+const missingLocalized = otherLocales.flatMap((candidate) =>
+  localizedScreens
+    .filter((name) => !hasScreen(name, candidate))
+    .map((name) => `${candidate}/${name}.jpg`),
+);
+---
+
+<BaseLayout {locale} title="Assets" description="Internal asset preview" noindex>
+  <div class="assets container">
+    <h1>Assets</h1>
+
+    <section aria-labelledby="logo-heading">
+      <h2 id="logo-heading">Logo</h2>
+      <Picture
+        src={logo}
+        alt="Damas Evolution"
+        width={Math.round(logo.width / 2)}
+        height={Math.round(logo.height / 2)}
+        densities={[1, 2]}
+        formats={['avif', 'webp']}
+        fallbackFormat="png"
+      />
+    </section>
+
+    <section aria-labelledby="pieces-heading">
+      <h2 id="pieces-heading">Pieces</h2>
+      {pieceSizes.map((size) => (
+        <div class="assets__row">
+          {pieceColors.flatMap((color) =>
+            pieceKinds.map((kind) => <Piece {color} {kind} {size} />),
+          )}
+        </div>
+      ))}
+    </section>
+
+    <section aria-labelledby="pattern-heading">
+      <h2 id="pattern-heading">Board pattern</h2>
+      <BoardPattern />
+      <div class="assets__field">
+        <BoardPattern variant="field" cell="2rem" />
+        <p>field</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="icons-heading">
+      <h2 id="icons-heading">Icons and share image</h2>
+      <div class="assets__row">
+        <img src={withBase('/favicon.svg')} width="64" height="64" alt="favicon.svg" />
+        <img src={withBase('/favicon-32.png')} width="32" height="32" alt="favicon-32.png" />
+        <img
+          src={withBase('/apple-touch-icon.png')}
+          width="90"
+          height="90"
+          alt="apple-touch-icon.png"
+        />
+        <img src={withBase('/icon-192.png')} width="96" height="96" alt="icon-192.png" />
+        <img src={withBase('/icon-512.png')} width="128" height="128" alt="icon-512.png" />
+        <img
+          src={withBase('/icon-maskable-512.png')}
+          width="128"
+          height="128"
+          alt="icon-maskable-512.png"
+        />
+      </div>
+      <img
+        class="assets__og"
+        src={withBase('/og-image.jpg')}
+        width="1200"
+        height="630"
+        alt="og-image.jpg"
+      />
+    </section>
+
+    <section aria-labelledby="sound-heading">
+      <h2 id="sound-heading">Sound</h2>
+      <CaptureSoundButton label={t.sound.playCapture} />
+    </section>
+
+    <section aria-labelledby="screens-heading">
+      <h2 id="screens-heading">Screens</h2>
+      <ul class="assets__screens">
+        {allScreens.map((name) => (
+          <li>
+            <AppScreen {name} {locale} />
+            <p>
+              {name}
+              {capturedScreens.includes(name) ? '' : ' (placeholder)'}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <h3>Missing localized screens</h3>
+      <ul>
+        {missingLocalized.map((file) => (
+          <li>{file}</li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .assets {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-xl);
+  }
+
+  .assets section {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .assets__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--space-s);
+  }
+
+  .assets__field {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 8rem;
+    background-color: var(--color-surface);
+  }
+
+  .assets__og {
+    width: min(100%, 40rem);
+    height: auto;
+  }
+
+  .assets__screens {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-m);
+    width: 100%;
+  }
+</style>

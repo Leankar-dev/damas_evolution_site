@@ -1,0 +1,62 @@
+---
+import BoardPattern from './BoardPattern.astro';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { facts } = getDictionary(locale);
+const items = [facts.noAds, facts.noAccount, facts.offline, facts.languages];
+---
+
+<section class="facts">
+  <BoardPattern cell="0.6rem" />
+  <ul class="facts__list container">
+    {items.map((item) => (
+      <li class="facts__item reveal">
+        <strong>{item.title}</strong>
+        <span>{item.text}</span>
+      </li>
+    ))}
+  </ul>
+  <BoardPattern cell="0.6rem" />
+</section>
+
+<style>
+  .facts {
+    background-color: var(--color-surface);
+  }
+
+  .facts__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-m) var(--space-l);
+    padding-block: var(--space-l);
+  }
+
+  .facts__item {
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+  }
+
+  .facts__item strong {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1.1;
+  }
+
+  .facts__item span {
+    color: var(--color-text-muted);
+    max-width: 24ch;
+  }
+
+  @media (min-width: 60rem) {
+    .facts__item:nth-child(even) {
+      padding-top: var(--space-s);
+    }
+  }
+</style>

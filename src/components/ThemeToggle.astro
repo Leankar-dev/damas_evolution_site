@@ -1,0 +1,106 @@
+---
+import { themeColors, themeStorageKey } from '../config/theme';
+import { getDictionary } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { theme } = getDictionary(locale);
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  aria-pressed="false"
+  data-storage-key={themeStorageKey}
+  data-light-color={themeColors.light}
+  data-dark-color={themeColors.dark}
+  hidden
+>
+  <span class="theme-toggle__icon" aria-hidden="true"></span>
+  <span class="theme-toggle__label">{theme.dark}</span>
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+  const root = document.documentElement;
+  const query = window.matchMedia('(prefers-color-scheme: dark)');
+
+  if (button) {
+    const isDark = () => (root.dataset.theme ? root.dataset.theme === 'dark' : query.matches);
+    const sync = () => button.setAttribute('aria-pressed', String(isDark()));
+
+    button.hidden = false;
+    sync();
+
+    button.addEventListener('click', () => {
+      const next = isDark() ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem(button.dataset.storageKey ?? 'theme', next);
+      } catch {
+        void 0;
+      }
+      const color = next === 'dark' ? button.dataset.darkColor : button.dataset.lightColor;
+      document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((meta) => {
+        if (color) meta.content = color;
+      });
+      sync();
+    });
+
+    query.addEventListener('change', sync);
+  }
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+    padding: var(--space-2xs) var(--space-xs);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    background-color: transparent;
+    color: var(--color-link);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--color-line);
+  }
+
+  .theme-toggle[aria-pressed='true'] .theme-toggle__icon {
+    transform: rotate(180deg);
+  }
+
+  .theme-toggle__icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  @media (min-width: 64rem) {
+    .theme-toggle {
+      justify-content: center;
+    }
+
+    .theme-toggle__label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+</style>

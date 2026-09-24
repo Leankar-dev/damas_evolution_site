@@ -1,0 +1,110 @@
+:root {
+  color-scheme: light dark;
+
+  --color-paper: #f0e6c8;
+  --color-surface: #f5edd5;
+  --color-surface-strong: #e8c99a;
+  --color-ink: #2c1810;
+  --color-ink-muted: #5b4632;
+  --color-wood: #8b5e3c;
+  --color-wood-strong: #6f4a2d;
+  --color-gold: #d4a56a;
+  --color-gold-bright: #ffd700;
+  --color-line: #a8906a;
+  --color-teal: #146359;
+  --color-piece-red: #b3261e;
+  --color-piece-blue: #3b7cb8;
+  --color-board-light: #e8c99a;
+  --color-board-dark: #8b5e3c;
+  --color-on-wood: #f5edd5;
+  --color-focus: #146359;
+
+  --color-bg: var(--color-paper);
+  --color-text: var(--color-ink);
+  --color-text-muted: var(--color-ink-muted);
+  --color-link: var(--color-wood-strong);
+  --color-button-bg: var(--color-wood-strong);
+  --color-button-text: var(--color-on-wood);
+  --color-shadow: rgb(44 24 16 / 0.18);
+  --band-bg: #2c1810;
+  --band-text: #f0e6c8;
+  --band-muted: #cdbb98;
+  --band-link: #d4a56a;
+
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.92rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  --step-2: clamp(1.44rem, 1.25rem + 0.95vw, 1.95rem);
+  --step-3: clamp(1.73rem, 1.4rem + 1.65vw, 2.6rem);
+  --step-4: clamp(2.07rem, 1.5rem + 2.85vw, 3.5rem);
+  --step-5: clamp(2.49rem, 1.5rem + 4.95vw, 4.75rem);
+
+  --space-3xs: clamp(0.25rem, 0.24rem + 0.05vw, 0.3rem);
+  --space-2xs: clamp(0.5rem, 0.48rem + 0.1vw, 0.6rem);
+  --space-xs: clamp(0.75rem, 0.72rem + 0.15vw, 0.9rem);
+  --space-s: clamp(1rem, 0.96rem + 0.2vw, 1.2rem);
+  --space-m: clamp(1.5rem, 1.44rem + 0.3vw, 1.8rem);
+  --space-l: clamp(2rem, 1.9rem + 0.5vw, 2.4rem);
+  --space-xl: clamp(3rem, 2.8rem + 1vw, 3.6rem);
+  --space-2xl: clamp(4rem, 3.6rem + 2vw, 5.2rem);
+  --space-3xl: clamp(6rem, 5.2rem + 4vw, 8rem);
+
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+  --container: min(100% - 2 * var(--gutter), 72rem);
+  --measure: 68ch;
+  --touch-target: 2.75rem;
+
+  --radius-s: 0.375rem;
+  --radius-m: 0.75rem;
+  --radius-l: 1.25rem;
+  --radius-pill: 999px;
+
+  --shadow-s: 0 1px 2px var(--color-shadow);
+  --shadow-m: 0 6px 18px var(--color-shadow);
+  --shadow-l: 0 16px 40px var(--color-shadow);
+
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 480ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-bg: #1e140a;
+    --color-surface: #241a0c;
+    --color-text: #f0e6c8;
+    --color-text-muted: #cdbb98;
+    --color-link: var(--color-gold);
+    --color-line: #5a4529;
+    --color-button-bg: var(--color-gold);
+    --color-button-text: #1e140a;
+    --color-focus: var(--color-gold-bright);
+    --color-shadow: rgb(0 0 0 / 0.5);
+    --band-bg: #120c06;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #1e140a;
+  --color-surface: #241a0c;
+  --color-text: #f0e6c8;
+  --color-text-muted: #cdbb98;
+  --color-link: var(--color-gold);
+  --color-line: #5a4529;
+  --color-button-bg: var(--color-gold);
+  --color-button-text: #1e140a;
+  --color-focus: var(--color-gold-bright);
+  --color-shadow: rgb(0 0 0 / 0.5);
+  --band-bg: #120c06;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}

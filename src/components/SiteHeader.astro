@@ -1,0 +1,217 @@
+---
+import BoardPattern from './BoardPattern.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { site } from '../config/site';
+import { getDictionary, localizedPath } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+  page: string;
+}
+
+const { locale, page } = Astro.props;
+const t = getDictionary(locale);
+const links = [
+  { href: `${localizedPath(locale)}#how-to-play`, label: t.nav.howToPlay, page: null },
+  { href: localizedPath(locale, 'rules/'), label: t.nav.rules, page: 'rules/' },
+  { href: localizedPath(locale, 'privacy/'), label: t.nav.privacy, page: 'privacy/' },
+  { href: `${localizedPath(locale)}#download`, label: t.nav.download, page: null },
+];
+---
+
+<header class="site-header">
+  <div class="site-header__inner container">
+    <a class="brand" href={localizedPath(locale)} aria-label={t.a11y.homeLink}>
+      <svg class="brand__mark" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" fill="var(--color-piece-red)"></circle>
+        <circle
+          cx="16"
+          cy="16"
+          r="10"
+          fill="none"
+          stroke="var(--color-gold-bright)"
+          stroke-width="2"
+        ></circle>
+      </svg>
+      <span class="brand__name">{site.name}</span>
+    </a>
+    <button
+      type="button"
+      class="menu-toggle"
+      aria-expanded="false"
+      aria-controls="site-menu"
+      hidden
+    >
+      <span>{t.nav.menu}</span>
+      <span class="menu-toggle__bars" aria-hidden="true"></span>
+    </button>
+    <div class="site-menu" id="site-menu">
+      <nav class="site-nav" aria-label={t.a11y.mainNavigation}>
+        <ul>
+          {links.map((link) => (
+            <li>
+              <a href={link.href} aria-current={page === link.page ? 'page' : undefined}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <LanguageSwitcher current={locale} {page} label={t.a11y.languageNavigation} />
+      <ThemeToggle {locale} />
+    </div>
+  </div>
+  <BoardPattern />
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('.site-header');
+  const toggle = header?.querySelector<HTMLButtonElement>('.menu-toggle');
+  const menu = header?.querySelector<HTMLElement>('#site-menu');
+
+  if (header && toggle && menu) {
+    const setOpen = (open: boolean) => {
+      header.dataset.open = String(open);
+      toggle.setAttribute('aria-expanded', String(open));
+    };
+
+    header.dataset.menu = 'enhanced';
+    toggle.hidden = false;
+    setOpen(false);
+
+    toggle.addEventListener('click', () => setOpen(header.dataset.open !== 'true'));
+    menu.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
+    });
+    header.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && header.dataset.open === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .site-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-m);
+    padding-block: var(--space-2xs);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: var(--touch-target);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--color-text);
+  }
+
+  .brand__mark {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .menu-toggle {
+    display: none;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: var(--touch-target);
+    padding: var(--space-2xs) var(--space-s);
+    border: 2px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    background-color: transparent;
+    color: var(--color-link);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .menu-toggle[aria-expanded='true'] {
+    border-color: var(--color-link);
+  }
+
+  .menu-toggle__bars {
+    width: 1.1rem;
+    height: 0.75rem;
+    background:
+      linear-gradient(currentColor 0 0) top / 100% 2px no-repeat,
+      linear-gradient(currentColor 0 0) center / 100% 2px no-repeat,
+      linear-gradient(currentColor 0 0) bottom / 100% 2px no-repeat;
+  }
+
+  .site-header[data-menu='enhanced'] .menu-toggle {
+    display: inline-flex;
+  }
+
+  .site-header[data-menu='enhanced']:not([data-open='true']) .site-menu {
+    display: none;
+  }
+
+  .site-menu {
+    display: flex;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2xs);
+    padding-block: var(--space-2xs) var(--space-s);
+  }
+
+  .site-nav ul {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+    padding-inline: var(--space-2xs);
+    font-weight: 600;
+    color: var(--color-link);
+  }
+
+  .site-nav a[aria-current='page'] {
+    color: var(--color-text);
+  }
+
+  @media (min-width: 64rem) {
+    .site-header[data-menu='enhanced'] .menu-toggle {
+      display: none;
+    }
+
+    .site-header[data-menu='enhanced']:not([data-open='true']) .site-menu,
+    .site-menu {
+      display: flex;
+    }
+
+    .site-menu {
+      flex: 1;
+      flex-basis: auto;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--space-m);
+      padding-block: 0;
+    }
+
+    .site-nav ul {
+      flex-direction: row;
+      gap: var(--space-2xs);
+    }
+
+    .site-nav a {
+      padding-inline: var(--space-xs);
+    }
+  }
+</style>

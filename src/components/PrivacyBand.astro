@@ -1,0 +1,131 @@
+---
+import BoardPattern from './BoardPattern.astro';
+import { getDictionary, localizedPath } from '../i18n';
+import type { Locale } from '../i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const { privacySection: privacy } = getDictionary(locale);
+const items = [
+  privacy.items.noAccount,
+  privacy.items.noAds,
+  privacy.items.noTracking,
+  privacy.items.offline,
+];
+---
+
+<section class="privacy" id="privacy" aria-labelledby="privacy-title">
+  <BoardPattern variant="field" cell="2.5rem" />
+  <div class="privacy__inner container">
+    <div class="privacy__intro reveal">
+      <h2 id="privacy-title">{privacy.title}</h2>
+      <p class="privacy__lead">{privacy.lead}</p>
+    </div>
+    <ul class="privacy__list">
+      {items.map((item) => (
+        <li class="reveal">{item}</li>
+      ))}
+    </ul>
+    <div class="privacy__foot reveal">
+      <p>{privacy.siteNote}</p>
+      <a href={localizedPath(locale, 'privacy/')}>{privacy.link}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .privacy {
+    position: relative;
+    margin-block: var(--space-2xl);
+    background-color: var(--band-bg);
+    color: var(--band-text);
+    overflow: hidden;
+  }
+
+  .privacy__inner {
+    position: relative;
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-3xl);
+  }
+
+  .privacy__intro {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .privacy h2 {
+    font-size: var(--step-5);
+    max-width: 14ch;
+  }
+
+  .privacy__lead {
+    font-size: var(--step-1);
+    color: var(--band-muted);
+    max-width: 40ch;
+  }
+
+  .privacy__list {
+    display: grid;
+  }
+
+  .privacy__list li {
+    padding-block: var(--space-xs);
+    border-top: 1px solid rgb(240 230 200 / 0.28);
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .privacy__list li:last-child {
+    border-bottom: 1px solid rgb(240 230 200 / 0.28);
+  }
+
+  .privacy__foot {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+    color: var(--band-muted);
+  }
+
+  .privacy__foot a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    font-weight: 700;
+    color: var(--band-link);
+  }
+
+  .privacy :global(:focus-visible) {
+    outline-color: var(--color-gold-bright);
+  }
+
+  @media (min-width: 60rem) {
+    .privacy__inner {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      column-gap: var(--space-2xl);
+      row-gap: var(--space-m);
+      align-items: start;
+    }
+
+    .privacy__intro {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .privacy__foot {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .privacy__list {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      padding-top: var(--space-l);
+    }
+  }
+</style>
